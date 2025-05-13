@@ -39,3 +39,4 @@ The Database has a method, `ListCollectionNames`, that sends a request with a ce
 5. [X] Hook the APICommander instance creation into the constructor of Database, enriching the Database unit tests accordingly
 6. [X] Add an actually-working `Request` method to the APICommander, which sends a POST request to the URL and returns the response (if successful). This may require new dependencies to handle http requests.
 7. [X] Work on the `ListCollectionNames` method of `Database`
+8. [X] Add an integration test that simply creates a client->database and runs ListCollectionNames on a real, actual database.
