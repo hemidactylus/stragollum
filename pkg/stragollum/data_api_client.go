@@ -1,5 +1,9 @@
 package stragollum
 
+import (
+	"fmt"
+)
+
 // Environment type for specifying deployment environment
 type Environment string
 
@@ -41,6 +45,7 @@ func (c *DataAPIClient) Token() *string {
 
 // GetDatabase creates a Database instance with the given apiEndpoint, optional token, and optional keyspace.
 // If token is nil, uses the DataAPIClient's token. If keyspace is empty, uses the default DefaultKeyspace.
+// It also initializes and embeds a DataAPICommander.
 func (c *DataAPIClient) GetDatabase(apiEndpoint string, token *string, keyspace string) *Database {
 	finalToken := token
 	if finalToken == nil {
@@ -50,9 +55,14 @@ func (c *DataAPIClient) GetDatabase(apiEndpoint string, token *string, keyspace 
 	if finalKeyspace == "" {
 		finalKeyspace = DefaultKeyspace
 	}
+
+	commanderURL := fmt.Sprintf("%s/api/json/v1/%s", apiEndpoint, finalKeyspace)
+	commander := NewDataAPICommander(commanderURL, finalToken)
+
 	return &Database{
 		apiEndpoint: apiEndpoint,
 		token:       finalToken,
 		keyspace:    finalKeyspace,
+		commander:   commander,
 	}
 }

@@ -5,6 +5,7 @@ type Database struct {
 	apiEndpoint string
 	token       *string
 	keyspace    string
+	commander   *DataAPICommander // Added commander field
 }
 
 // Keyspace returns the keyspace associated with the Database.
@@ -20,4 +21,9 @@ func (db *Database) ApiEndpoint() string {
 // Token returns the token associated with the Database.
 func (db *Database) Token() *string {
 	return db.token
+}
+
+// Commander returns the DataAPICommander instance associated with the Database.
+func (db *Database) Commander() *DataAPICommander {
+	return db.commander
 }
