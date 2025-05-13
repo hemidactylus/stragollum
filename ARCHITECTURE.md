@@ -36,6 +36,6 @@ The Database has a method, `ListCollectionNames`, that sends a request with a ce
 2. [X] Write a draft for class `Database`
 3. [X] Add `GetDatabase`, with appropriate tests to check the parameter behaviour under all conditions
 4. [X] Create the APICommander class (with getters out of convenience) and simple unit tests
-5. [ ] Hook the APICommander instance creation into the constructor of Database, enriching the Database unit tests accordingly
-6. [ ] Add an actually-working `Request` method to the APICommander, which sends a POST request to the URL and returns the response (if successful). This may require new dependencies to handle http requests.
+5. [X] Hook the APICommander instance creation into the constructor of Database, enriching the Database unit tests accordingly
+6. [X] Add an actually-working `Request` method to the APICommander, which sends a POST request to the URL and returns the response (if successful). This may require new dependencies to handle http requests.
 7. [ ] Work on the `ListCollectionNames` method of `Database`
