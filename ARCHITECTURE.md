@@ -24,6 +24,10 @@ The DataAPICommander constructor accepts the URL (required string) and the token
 - If token is provided, it translates into a "Token: <token>" header to POST requests (no headers oterwise)
 - The Database creates an instance of the APICommander and keeps it ready to use each time it needs to perform a request.
 
+The Database has a method, `ListCollectionNames`, that sends a request with a certain JSON payload and returns the response to its caller. To do so, the APICommander is used internally.
+- Payload (sent to the commander URL): `{"findCollections": {}}`
+- Response shape: `{"status": {"collections": xxx}}`, where xxx is a list of strings, the return value of the method
+
 ## Action plan
 
 (Done items are marked with [X] in the following)
@@ -31,5 +35,7 @@ The DataAPICommander constructor accepts the URL (required string) and the token
 1. [X] Create a skeletal DataAPIClient class and a simple unit test for it
 2. [X] Write a draft for class `Database`
 3. [X] Add `GetDatabase`, with appropriate tests to check the parameter behaviour under all conditions
-4. [ ] Create the APICommander class (with getters out of convenience) and simple unit tests
+4. [X] Create the APICommander class (with getters out of convenience) and simple unit tests
 5. [ ] Hook the APICommander instance creation into the constructor of Database, enriching the Database unit tests accordingly
+6. [ ] Add an actually-working `Request` method to the APICommander, which sends a POST request to the URL and returns the response (if successful). This may require new dependencies to handle http requests.
+7. [ ] Work on the `ListCollectionNames` method of `Database`
