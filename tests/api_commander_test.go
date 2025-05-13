@@ -1,4 +1,4 @@
-package stragollum
+package stragollum_test
 
 import (
 	"stragollum/pkg/stragollum"
