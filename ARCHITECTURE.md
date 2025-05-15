@@ -8,25 +8,49 @@ This package is being designed and created as we go, so here for now is a tentat
 ## Architectural plan
 
 User code would always begin by creating an instance of class `DataAPIClient`.
-When doing so, _optionally_, an "environment" (one of an enum DEV/TEST/PROD) is specified; also optionally an authentication token (a string) can be supplied.
 
 A `DataAPIClient` has a `GetDatabase` method to spawn a `Database` instance.
-This method has a required parameter, `apiEndpoint` (string), and an optional `token` which if supplied replaces the DataAPIClient setting.
-Another optional parameter is `keyspace`, which if omitted has a hardcoded default.
 
-Databases have methods that trigger HTTP POST requests to the Data API, with a certain payload,
-and parse the response to construct the method return value. For convenience, since these requests 
-require certain headers and share a common path prefix, a helper `DataAPICommander` class is created,
+Database methods (e.g. `ListCollectionNames`) send a request with a certain JSON payload and returns
+(a manipulated) response to its caller.
+
+For convenience, since these requests share certain properties,a helper `DataAPICommander` class is created,
 not for direct use by the user code.
 
-The DataAPICommander constructor accepts the URL (required string) and the token (optional) parameters.
-- The commander URL is built by the Database and is in the form "<api endpoint>/api/json/v1/<keyspace>"
-- If token is provided, it translates into a "Token: <token>" header to POST requests (no headers oterwise)
-- The Database creates an instance of the APICommander and keeps it ready to use each time it needs to perform a request.
-
-The Database has a method, `ListCollectionNames`, that sends a request with a certain JSON payload and returns the response to its caller. To do so, the APICommander is used internally.
-- Payload (sent to the commander URL): `{"findCollections": {}}`
-- Response shape: `{"status": {"collections": xxx}}`, where xxx is a list of strings, the return value of the method
+The `Database` needs a `CreateCollection` method. Its parameters are `name` (string) and `definition`, and for now it will return nothing. The `definition` is an object of a new struct type, `CollectionDefinition`, which must capture the structure in the following example (but all fields are optional!):
+```
+{
+    "defaultId": {
+        "type": "string"
+    },
+    "indexing": {"k": "v"},
+    "lexical": {
+        "analyzer": "string",
+        "enabled": true
+    },
+    "rerank": {
+        "enabled": true,
+        "service": {
+            "authentication": {"k": "v"},
+            "modelName": "string",
+            "parameters": {"k": "v"},
+            "provider": "string"
+        }
+    },
+    "vector": {
+        "dimension": 999,
+        "metric": "string",
+        "service": {
+            "authentication": {"k": "v"},
+            "modelName": "string",
+            "parameters": {"k": "v"},
+            "provider": "string"
+        },
+        "sourceModel": "string"
+    }
+}
+```
+In the above, `{"k": "v"}` represents an arbitrary key-value mapping (with string keys).
 
 ## Action plan
 
@@ -40,3 +64,5 @@ The Database has a method, `ListCollectionNames`, that sends a request with a ce
 6. [X] Add an actually-working `Request` method to the APICommander, which sends a POST request to the URL and returns the response (if successful). This may require new dependencies to handle http requests.
 7. [X] Work on the `ListCollectionNames` method of `Database`
 8. [X] Add an integration test that simply creates a client->database and runs ListCollectionNames on a real, actual database.
+9. [X] Prepare, in a separate source file, the `CollectionDefinition` type (in the future, special constructors and helpers will also be there)
+10. [ ] Add the `Database.CreateCollection` method as described in the specs.
