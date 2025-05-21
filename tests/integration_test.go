@@ -62,3 +62,60 @@ func TestListCollectionNames_Integration(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateCollection_Integration(t *testing.T) {
+	if err := godotenv.Load("../.env"); err != nil {
+		t.Fatalf("Error loading .env file: %v", err)
+	}
+
+	apiEndpoint := os.Getenv("ASTRA_DB_API_ENDPOINT")
+	if apiEndpoint == "" {
+		t.Fatal("ASTRA_DB_API_ENDPOINT environment variable is required")
+	}
+	token := os.Getenv("ASTRA_DB_APPLICATION_TOKEN")
+	if token == "" {
+		t.Fatal("ASTRA_DB_APPLICATION_TOKEN environment variable is required")
+	}
+	keyspace := os.Getenv("ASTRA_DB_KEYSPACE")
+	if keyspace == "" {
+		t.Fatal("ASTRA_DB_KEYSPACE environment variable is required")
+	}
+	env := stragollum.EnvironmentProd
+	client := stragollum.NewDataAPIClient(&env, &token)
+	db := client.GetDatabase(apiEndpoint, nil, keyspace)
+
+	const testCollectionName = "coll_create_test"
+
+	// 1. List collections before creation
+	collections, err := db.ListCollectionNames()
+	if err != nil {
+		t.Fatalf("ListCollectionNames (before) failed: %v", err)
+	}
+	for _, name := range collections {
+		if name == testCollectionName {
+			t.Fatalf("Test collection %q already exists before creation!", testCollectionName)
+		}
+	}
+
+	// 2. Create collection with minimal (empty) definition
+	err = db.CreateCollection(testCollectionName, stragollum.NewCollectionDefinition())
+	if err != nil {
+		t.Fatalf("CreateCollection failed: %v", err)
+	}
+
+	// 3. List collections after creation
+	collections, err = db.ListCollectionNames()
+	if err != nil {
+		t.Fatalf("ListCollectionNames (after) failed: %v", err)
+	}
+	found := false
+	for _, name := range collections {
+		if name == testCollectionName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("Collection %q was not found after creation", testCollectionName)
+	}
+}

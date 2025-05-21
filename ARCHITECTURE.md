@@ -52,6 +52,9 @@ The `Database` needs a `CreateCollection` method. Its parameters are `name` (str
 ```
 In the above, `{"k": "v"}` represents an arbitrary key-value mapping (with string keys).
 
+The `createCollection` method, with parameters `name` and `definition` outlined above, must create the full payload for a POST request to the Data API (done through the APICommander just like listCollectionNames).
+The payload has the form: `{"createCollection": {"name": <name>, "options": <definition>}}`; the response must simply be: `{"status": {"ok": 1}}` (if it's not like this, an error must be raised).
+
 ## Action plan
 
 (Done items are marked with [X] in the following)
@@ -65,4 +68,4 @@ In the above, `{"k": "v"}` represents an arbitrary key-value mapping (with strin
 7. [X] Work on the `ListCollectionNames` method of `Database`
 8. [X] Add an integration test that simply creates a client->database and runs ListCollectionNames on a real, actual database.
 9. [X] Prepare, in a separate source file, the `CollectionDefinition` type (in the future, special constructors and helpers will also be there)
-10. [ ] Add the `Database.CreateCollection` method as described in the specs.
+10. [X] Add the `Database.CreateCollection` method as described in the specs.

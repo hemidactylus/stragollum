@@ -1,5 +1,7 @@
 package stragollum
 
+import "fmt"
+
 // Database represents a connection to a specific database/keyspace via the Data API.
 type Database struct {
 	apiEndpoint string
@@ -53,4 +55,41 @@ func (db *Database) ListCollectionNames() ([]string, error) {
 
 	// Return the extracted collection names
 	return responseData.Status.Collections, nil
+}
+
+// CreateCollection creates a new collection with the given name and definition (as options).
+// Returns an error if the API response is not {"status": {"ok": 1}} or if the request fails.
+func (db *Database) CreateCollection(name string, definition *CollectionDefinition) error {
+	// Prepare the payload as per API spec
+	type inner struct {
+		Name    string                `json:"name"`
+		Options *CollectionDefinition `json:"options"`
+	}
+	payload := struct {
+		CreateCollection inner `json:"createCollection"`
+	}{
+		CreateCollection: inner{
+			Name:    name,
+			Options: definition,
+		},
+	}
+
+	// Define the expected response structure
+	var response struct {
+		Status struct {
+			Ok *int `json:"ok"`
+		} `json:"status"`
+	}
+
+	err := db.commander.Request(payload, &response)
+	if err != nil {
+		return err
+	}
+
+	// Defensive: check for missing status or ok fields
+	if response.Status.Ok == nil || *response.Status.Ok != 1 {
+		return fmt.Errorf("unexpected response: expected status.ok == 1, got: %+v", response)
+	}
+
+	return nil
 }
