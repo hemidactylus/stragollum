@@ -93,3 +93,38 @@ func (db *Database) CreateCollection(name string, definition *CollectionDefiniti
 
 	return nil
 }
+
+// DropCollection drops the collection with the given name.
+// Returns an error if the API response is not {"status": {"ok": 1}} or if the request fails.
+func (db *Database) DropCollection(name string) error {
+	// Prepare the payload as per API spec
+	type inner struct {
+		Name string `json:"name"`
+	}
+	payload := struct {
+		DeleteCollection inner `json:"deleteCollection"`
+	}{
+		DeleteCollection: inner{
+			Name: name,
+		},
+	}
+
+	// Define the expected response structure
+	var response struct {
+		Status struct {
+			Ok *int `json:"ok"`
+		} `json:"status"`
+	}
+
+	err := db.commander.Request(payload, &response)
+	if err != nil {
+		return err
+	}
+
+	// Defensive: check for missing status or ok fields
+	if response.Status.Ok == nil || *response.Status.Ok != 1 {
+		return fmt.Errorf("unexpected response: expected status.ok == 1, got: %+v", response)
+	}
+
+	return nil
+}

@@ -118,4 +118,25 @@ func TestCreateCollection_Integration(t *testing.T) {
 	if !found {
 		t.Errorf("Collection %q was not found after creation", testCollectionName)
 	}
+
+	// 4. Clean up: delete the test collection
+	err = db.DropCollection(testCollectionName)
+	if err != nil {
+		t.Fatalf("DropCollection failed: %v", err)
+	}
+	// 5. Verify deletion
+	collections, err = db.ListCollectionNames()
+	if err != nil {
+		t.Fatalf("ListCollectionNames (after deletion) failed: %v", err)
+	}
+	found = false
+	for _, name := range collections {
+		if name == testCollectionName {
+			found = true
+			break
+		}
+	}
+	if found {
+		t.Errorf("Collection %q was found after deletion", testCollectionName)
+	}
 }

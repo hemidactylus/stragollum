@@ -69,3 +69,6 @@ The payload has the form: `{"createCollection": {"name": <name>, "options": <def
 8. [X] Add an integration test that simply creates a client->database and runs ListCollectionNames on a real, actual database.
 9. [X] Prepare, in a separate source file, the `CollectionDefinition` type (in the future, special constructors and helpers will also be there)
 10. [X] Add the `Database.CreateCollection` method as described in the specs.
+11. [X] Add a `Database.DropCollection` counterpart method (+test).
+12. [ ] CRUD first steps: insert one (with untyped dict)
+13. [ ] CRUD second step: find one (with untyped dict)
