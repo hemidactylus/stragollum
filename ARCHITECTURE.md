@@ -55,6 +55,10 @@ In the above, `{"k": "v"}` represents an arbitrary key-value mapping (with strin
 The `createCollection` method, with parameters `name` and `definition` outlined above, must create the full payload for a POST request to the Data API (done through the APICommander just like listCollectionNames).
 The payload has the form: `{"createCollection": {"name": <name>, "options": <definition>}}`; the response must simply be: `{"status": {"ok": 1}}` (if it's not like this, an error must be raised).
 
+The `Collection` class has a method `InsertOne` that accepts a parameter which can be an arbitrary dictionary with string keys, possibly nested.
+The method prepares a JSON payload such as `{"insertOne": {"document": <the input doc to insert>}}` and uses its APICommander to send it.
+The response will be in the form `{"status": {"insertedIds": [<the id>]}}`, and the value of `<the id>` is the (string) return value of the method.
+
 ## Action plan
 
 (Done items are marked with [X] in the following)
@@ -70,5 +74,10 @@ The payload has the form: `{"createCollection": {"name": <name>, "options": <def
 9. [X] Prepare, in a separate source file, the `CollectionDefinition` type (in the future, special constructors and helpers will also be there)
 10. [X] Add the `Database.CreateCollection` method as described in the specs.
 11. [X] Add a `Database.DropCollection` counterpart method (+test).
-12. [ ] CRUD first steps: insert one (with untyped dict)
+12. [X] Create a stub for the `Collection` class
+12. [X] CRUD first steps: insert one (with untyped dict)
 13. [ ] CRUD second step: find one (with untyped dict)
+14. [ ] improvements I: detect api errors in marshaling response
+15. [ ] improvements II: refactor error detection
+16. [ ] improvements III: refactor get-the-database for int.testing
+17. [ ] improvements IV: (optional) typing for collections with type parameter

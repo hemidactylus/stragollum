@@ -47,9 +47,12 @@ func TestDatabase_CreateCollection(t *testing.T) {
 	db := client.GetDatabase(server.URL, nil, "ks1")
 
 	// Should succeed
-	err := db.CreateCollection(expectedName, definition)
+	collection, err := db.CreateCollection(expectedName, definition)
 	if err != nil {
 		t.Fatalf("CreateCollection failed: %v", err)
+	}
+	if collection == nil {
+		t.Fatalf("Expected non-nil collection, got nil")
 	}
 
 	// Test error: server returns ok != 1
@@ -58,7 +61,7 @@ func TestDatabase_CreateCollection(t *testing.T) {
 	}))
 	defer failServer.Close()
 	failDB := client.GetDatabase(failServer.URL, nil, "ks1")
-	err = failDB.CreateCollection(expectedName, definition)
+	_, err = failDB.CreateCollection(expectedName, definition)
 	if err == nil {
 		t.Error("Expected error when status.ok != 1, got nil")
 	}
@@ -69,7 +72,7 @@ func TestDatabase_CreateCollection(t *testing.T) {
 	}))
 	defer missingStatusServer.Close()
 	missingStatusDB := client.GetDatabase(missingStatusServer.URL, nil, "ks1")
-	err = missingStatusDB.CreateCollection(expectedName, definition)
+	_, err = missingStatusDB.CreateCollection(expectedName, definition)
 	if err == nil {
 		t.Error("Expected error when status is missing, got nil")
 	}
@@ -80,7 +83,7 @@ func TestDatabase_CreateCollection(t *testing.T) {
 	}))
 	defer missingOkServer.Close()
 	missingOkDB := client.GetDatabase(missingOkServer.URL, nil, "ks1")
-	err = missingOkDB.CreateCollection(expectedName, definition)
+	_, err = missingOkDB.CreateCollection(expectedName, definition)
 	if err == nil {
 		t.Error("Expected error when status.ok is missing, got nil")
 	}
