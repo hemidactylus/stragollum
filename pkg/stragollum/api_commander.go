@@ -81,6 +81,9 @@ func (ac *DataAPICommander) Request(requestObj interface{}, responseObj interfac
 		return fmt.Errorf("failed to marshal request to JSON: %w", err)
 	}
 
+	// TODO: better control of logging
+	// fmt.Printf("API Request payload: %s\n", string(payload))
+
 	// Set JSON content type header
 	headers := map[string]string{
 		"Content-Type": "application/json",

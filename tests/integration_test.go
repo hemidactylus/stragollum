@@ -85,6 +85,7 @@ func TestCreateCollection_Integration(t *testing.T) {
 	db := client.GetDatabase(apiEndpoint, nil, keyspace)
 
 	const testCollectionName = "coll_create_test"
+	const testRichCollectionName = "coll_create_test_rich"
 
 	// 1. List collections before creation
 	collections, err := db.ListCollectionNames()
@@ -103,20 +104,49 @@ func TestCreateCollection_Integration(t *testing.T) {
 		t.Fatalf("CreateCollection failed: %v", err)
 	}
 
+	// 2b. Create collection with a rich definition
+	richDefinition := stragollum.NewCollectionDefinition().
+		WithDefaultID("objectId").
+		WithLexical("standard").
+		WithIndexing(map[string]any{"allow": []string{"the_field"}}).
+		WithRerank(
+			&stragollum.RerankServiceOptions{
+				Provider:  "nvidia",
+				ModelName: "nvidia/llama-3.2-nv-rerankqa-1b-v2",
+			},
+			true,
+		).
+		WithVector(&stragollum.CollectionVectorOptions{
+			Service: &stragollum.VectorServiceOptions{
+				Provider:  "nvidia",
+				ModelName: "NV-Embed-QA",
+			},
+		})
+	err = db.CreateCollection(testRichCollectionName, richDefinition)
+	if err != nil {
+		t.Fatalf("Rich CreateCollection failed: %v", err)
+	}
+
 	// 3. List collections after creation
 	collections, err = db.ListCollectionNames()
 	if err != nil {
 		t.Fatalf("ListCollectionNames (after) failed: %v", err)
 	}
 	found := false
+	foundRich := false
 	for _, name := range collections {
 		if name == testCollectionName {
 			found = true
-			break
+		}
+		if name == testRichCollectionName {
+			foundRich = true
 		}
 	}
 	if !found {
 		t.Errorf("Collection %q was not found after creation", testCollectionName)
+	}
+	if !foundRich {
+		t.Errorf("Collection %q was not found after creation", testRichCollectionName)
 	}
 
 	// 4. Clean up: delete the test collection
@@ -124,19 +154,31 @@ func TestCreateCollection_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DropCollection failed: %v", err)
 	}
+	// 4b. Clean up: delete the rich test collection
+	err = db.DropCollection(testRichCollectionName)
+	if err != nil {
+		t.Fatalf("DropCollection failed: %v", err)
+	}
+
 	// 5. Verify deletion
 	collections, err = db.ListCollectionNames()
 	if err != nil {
 		t.Fatalf("ListCollectionNames (after deletion) failed: %v", err)
 	}
 	found = false
+	foundRich = false
 	for _, name := range collections {
 		if name == testCollectionName {
 			found = true
-			break
+		}
+		if name == testRichCollectionName {
+			foundRich = true
 		}
 	}
 	if found {
 		t.Errorf("Collection %q was found after deletion", testCollectionName)
+	}
+	if foundRich {
+		t.Errorf("Collection %q was found after deletion", testRichCollectionName)
 	}
 }
