@@ -59,7 +59,7 @@ func (db *Database) ListCollectionNames() ([]string, error) {
 
 // CreateCollection creates a new collection with the given name and definition (as options).
 // Returns an error if the API response is not {"status": {"ok": 1}} or if the request fails.
-func (db *Database) CreateCollection(name string, definition *CollectionDefinition) error {
+func (db *Database) CreateCollection(name string, definition *CollectionDefinition) (*Collection, error) {
 	// Prepare the payload as per API spec
 	type inner struct {
 		Name    string                `json:"name"`
@@ -83,15 +83,15 @@ func (db *Database) CreateCollection(name string, definition *CollectionDefiniti
 
 	err := db.commander.Request(payload, &response)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Defensive: check for missing status or ok fields
 	if response.Status.Ok == nil || *response.Status.Ok != 1 {
-		return fmt.Errorf("unexpected response: expected status.ok == 1, got: %+v", response)
+		return nil, fmt.Errorf("unexpected response: expected status.ok == 1, got: %+v", response)
 	}
 
-	return nil
+	return db.GetCollection(name, nil), nil
 }
 
 // DropCollection drops the collection with the given name.
@@ -127,4 +127,22 @@ func (db *Database) DropCollection(name string) error {
 	}
 
 	return nil
+}
+
+func (d *Database) GetCollection(name string, token *string) *Collection {
+	finalToken := d.token
+	if token != nil {
+		finalToken = token
+	}
+
+	commanderURL := fmt.Sprintf("%s/api/json/v1/%s/%s", d.ApiEndpoint(), d.Keyspace(), name)
+	commander := NewDataAPICommander(commanderURL, finalToken)
+
+	return &Collection{
+		apiEndpoint: d.ApiEndpoint(),
+		name:        name,
+		token:       finalToken,
+		keyspace:    d.Keyspace(),
+		commander:   commander,
+	}
 }

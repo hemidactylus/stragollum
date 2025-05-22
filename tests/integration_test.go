@@ -99,9 +99,12 @@ func TestCreateCollection_Integration(t *testing.T) {
 	}
 
 	// 2. Create collection with minimal (empty) definition
-	err = db.CreateCollection(testCollectionName, stragollum.NewCollectionDefinition())
+	coll, err := db.CreateCollection(testCollectionName, stragollum.NewCollectionDefinition())
 	if err != nil {
 		t.Fatalf("CreateCollection failed: %v", err)
+	}
+	if coll.Name() != testCollectionName {
+		t.Errorf("Created collection has wrong name: %q, expected %q", coll.Name(), testCollectionName)
 	}
 
 	// 2b. Create collection with a rich definition
@@ -122,15 +125,18 @@ func TestCreateCollection_Integration(t *testing.T) {
 				ModelName: "NV-Embed-QA",
 			},
 		})
-	err = db.CreateCollection(testRichCollectionName, richDefinition)
-	if err != nil {
-		t.Fatalf("Rich CreateCollection failed: %v", err)
+	richColl, err2 := db.CreateCollection(testRichCollectionName, richDefinition)
+	if err2 != nil {
+		t.Fatalf("Rich CreateCollection failed: %v", err2)
+	}
+	if richColl.Name() != testRichCollectionName {
+		t.Errorf("Created rich collection has wrong name: %q, expected %q", richColl.Name(), testRichCollectionName)
 	}
 
 	// 3. List collections after creation
-	collections, err = db.ListCollectionNames()
-	if err != nil {
-		t.Fatalf("ListCollectionNames (after) failed: %v", err)
+	collections, err3 := db.ListCollectionNames()
+	if err3 != nil {
+		t.Fatalf("ListCollectionNames (after) failed: %v", err3)
 	}
 	found := false
 	foundRich := false
