@@ -56,3 +56,35 @@ func (co *Collection) InsertOne(document interface{}) (string, error) {
 	// Return the inserted document ID
 	return response.Status.InsertedIds[0], nil
 }
+
+// FindOne runs a search and returns a document, or nil if not found.
+// The filter parameter is a JSON object that specifies the search criteria.
+func (co *Collection) FindOne(filter interface{}) (map[string]interface{}, error) {
+	// Create the request payload as per API requirements
+	requestPayload := struct {
+		FindOne struct {
+			Filter interface{} `json:"filter"`
+		} `json:"findOne"`
+	}{
+		FindOne: struct {
+			Filter interface{} `json:"filter"`
+		}{
+			Filter: filter,
+		},
+	}
+
+	// Define the expected response structure
+	var response struct {
+		Data struct {
+			Document map[string]interface{} `json:"document"`
+		} `json:"data"`
+	}
+
+	// Send the request and parse the response
+	err := co.commander.Request(requestPayload, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Data.Document, nil
+}

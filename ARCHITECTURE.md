@@ -76,7 +76,7 @@ The response will be in the form `{"status": {"insertedIds": [<the id>]}}`, and 
 11. [X] Add a `Database.DropCollection` counterpart method (+test).
 12. [X] Create a stub for the `Collection` class
 12. [X] CRUD first steps: insert one (with untyped dict)
-13. [ ] CRUD second step: find one (with untyped dict)
+13. [X] CRUD second step: find one (with untyped dict)
 14. [ ] improvements I: detect api errors in marshaling response
 15. [ ] improvements II: refactor error detection
 16. [ ] improvements III: refactor get-the-database for int.testing

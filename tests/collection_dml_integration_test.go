@@ -4,6 +4,7 @@
 package stragollum_test
 
 import (
+	"encoding/json"
 	"os"
 	"stragollum/pkg/stragollum"
 	"testing"
@@ -77,6 +78,31 @@ func TestInsertOne_Integration(t *testing.T) {
 		t.Logf("Successfully inserted document with ID: %s", docID)
 	}
 
+	// Read the document back
+	result, err := collection.FindOne(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("IFindOnensertOne failed: %v", err)
+	} else {
+		if result != nil {
+			jsonResult, err := json.Marshal(result)
+			if err != nil {
+				t.Fatalf("Failed to marshal result: %v", err)
+			}
+			t.Logf("Successfully read back document: %s", string(jsonResult))
+			if id, ok := result["_id"].(string); ok {
+				// id contains the document ID as a string
+				if id != docID {
+					t.Errorf("Expected document ID %s, got %s", docID, id)
+				} else {
+					t.Logf("Successfully validated document ID: %s", id)
+				}
+			} else {
+				t.Errorf("Document _id is missing or not a string")
+			}
+		} else {
+			t.Errorf("FindOne returned nil document")
+		}
+	}
 	// Cleanup: We don't delete the collection as it might be used for future tests
 	// and deleting/creating collections too often might hit rate limits
 }
